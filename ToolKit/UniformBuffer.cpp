@@ -9,7 +9,7 @@
 
 #include "RHI.h"
 #include "Stats.h"
-#include "TKOpenGL.h"
+#include "TKRHI.h"
 
 #include "DebugNew.h"
 
@@ -22,14 +22,14 @@ namespace ToolKit
     m_slot = -1;
   }
 
-  UniformBuffer::~UniformBuffer() { glDeleteBuffers(1, &m_id); }
+  UniformBuffer::~UniformBuffer() { TKRHI::DeleteBuffers(1, &m_id); }
 
   void UniformBuffer::Init(uint64 size)
   {
     m_size = size;
-    glGenBuffers(1, &m_id);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_id);
-    glBufferData(GL_UNIFORM_BUFFER, m_size, nullptr, GL_DYNAMIC_DRAW);
+    TKRHI::GenBuffer(&m_id);
+    TKRHI::BindUniformBuffer(m_id);
+    TKRHI::BufferDataUniform(m_size, nullptr);
   }
 
   void UniformBuffer::Map(const void* data, uint64 size)
@@ -54,8 +54,8 @@ namespace ToolKit
 
     Stats::IncrementStat(FrameStatType::UboUpdates);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, m_id);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+    TKRHI::BindUniformBuffer(m_id);
+    TKRHI::BufferSubDataUniform(0, size, data);
   }
 
 } // namespace ToolKit

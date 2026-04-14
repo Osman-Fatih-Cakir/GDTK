@@ -25,6 +25,7 @@
 #include <Common/SDLEventPool.h>
 #include <Common/Win32Utils.h>
 #include <FileManager.h>
+#include <TKRHI_GL.h>
 #include <ImGui/backends/imgui_impl_sdl2.h>
 #include <PluginManager.h>
 #include <SDL.h>
@@ -340,8 +341,10 @@ namespace ToolKit
                                              TK_ERR(msg.c_str());
                                            }
 
-                                           GetLogger()->WritePlatformConsole(LogType::Error, msg.c_str());
-                                         });
+                                          GetLogger()->WritePlatformConsole(LogType::Error, msg.c_str());
+                                        });
+
+            TKRHI::RegisterOpenGLBackend(SDL_GL_GetProcAddress);
 
             // Init Main.
             // Register app specific classes to toolkit.

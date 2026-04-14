@@ -52,6 +52,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Launcher", "Launcher\Launch
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererBackend", "RendererBackend\RendererBackend.vcxproj", "{D8D59FC9-2708-4476-B3CD-EA79D782F1A2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85523A06-924E-4B9D-B95C-411CB388936B} = {85523A06-924E-4B9D-B95C-411CB388936B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -86,6 +91,10 @@ Global
 		{F79709B6-DE52-496C-97A3-E7D375448D00}.Debug|x64.Build.0 = Debug|x64
 		{F79709B6-DE52-496C-97A3-E7D375448D00}.Release|x64.ActiveCfg = Release|x64
 		{F79709B6-DE52-496C-97A3-E7D375448D00}.Release|x64.Build.0 = Release|x64
+		{D8D59FC9-2708-4476-B3CD-EA79D782F1A2}.Debug|x64.ActiveCfg = Debug|x64
+		{D8D59FC9-2708-4476-B3CD-EA79D782F1A2}.Debug|x64.Build.0 = Debug|x64
+		{D8D59FC9-2708-4476-B3CD-EA79D782F1A2}.Release|x64.ActiveCfg = Release|x64
+		{D8D59FC9-2708-4476-B3CD-EA79D782F1A2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +110,7 @@ Global
 		{81729BC3-4649-4748-82E5-499E09EFF00A} = {4D82EADD-5011-491D-89E5-AE98D2937639}
 		{354EED53-9994-4C7C-9857-E7107F0CDF3A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{F79709B6-DE52-496C-97A3-E7D375448D00} = {7B76CFC5-3DBB-45AC-8B68-50269EB5E0BF}
+		{D8D59FC9-2708-4476-B3CD-EA79D782F1A2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {464B3188-FFF2-428E-BA53-111139145374}

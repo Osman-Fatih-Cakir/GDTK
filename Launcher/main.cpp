@@ -10,6 +10,7 @@
 #include <Common/SDLEventPool.h>
 #include <Common/Win32Utils.h>
 #include <EngineSettings.h>
+#include <TKRHI_GL.h>
 #include <FileManager.h>
 #include <Image.h>
 #include <Object.h>
@@ -167,6 +168,8 @@ namespace ToolKit
       g_proxy->m_renderSys->InitGl(SDL_GL_GetProcAddress,
                                    [](const std::string& msg)
                                    { GetLogger()->WritePlatformConsole(LogType::Error, msg.c_str()); });
+
+      TKRHI::RegisterOpenGLBackend(SDL_GL_GetProcAddress);
 
       g_proxy->Init();
 

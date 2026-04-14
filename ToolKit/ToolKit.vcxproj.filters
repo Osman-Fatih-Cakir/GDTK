@@ -235,6 +235,9 @@
     <ClCompile Include="ShadowAtlas.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="TKRHI.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -496,6 +499,9 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="ShadowAtlas.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="TKRHI.h">
       <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>

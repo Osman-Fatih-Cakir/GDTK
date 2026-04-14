@@ -93,6 +93,7 @@
       <OrderInUnityFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">150</OrderInUnityFile>
     </ClCompile>
     <ClCompile Include="Stats.cpp" />
+    <ClCompile Include="TKRHI.cpp" />
     <ClCompile Include="ToolKit.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="Image.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Stats.h" />
+    <ClInclude Include="TKRHI.h" />
     <ClInclude Include="ToolKit.h" />
     <ClInclude Include="TKOpenGL.h" />
     <ClInclude Include="Types.h" />
