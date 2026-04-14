@@ -12,7 +12,7 @@
 #include "GpuProgram.h"
 #include "Logger.h"
 #include "TKAssert.h"
-#include "TKOpenGL.h"
+#include "TKRHI.h"
 #include "ToolKit.h"
 #include "Util.h"
 
@@ -141,7 +141,7 @@ namespace ToolKit
 
   void Shader::UnInit()
   {
-    glDeleteShader(m_shaderHandle);
+    TKRHI::DeleteShader(m_shaderHandle);
     m_initiated = false;
   }
 
@@ -416,14 +416,14 @@ namespace ToolKit
   {
     TK_LOG("Shader in compile %s", GetFile().c_str());
 
-    GLenum type = 0;
+    uint type = 0;
     if (m_shaderType == ShaderType::VertexShader)
     {
-      type = (GLenum) GraphicTypes::VertexShader;
+      type = (uint) GraphicTypes::VertexShader;
     }
     else if (m_shaderType == ShaderType::FragmentShader)
     {
-      type = (GLenum) GraphicTypes::FragmentShader;
+      type = (uint) GraphicTypes::FragmentShader;
     }
     else
     {
@@ -431,7 +431,7 @@ namespace ToolKit
       return 0;
     }
 
-    m_shaderHandle = glCreateShader(type);
+    m_shaderHandle = TKRHI::CreateShader(type);
     if (m_shaderHandle == 0)
     {
       return 0;
@@ -450,25 +450,22 @@ namespace ToolKit
       str = source.c_str();
     }
 
-    glShaderSource(m_shaderHandle, 1, &str, nullptr);
-    glCompileShader(m_shaderHandle);
+    TKRHI::ShaderSource(m_shaderHandle, str);
+    TKRHI::CompileShader(m_shaderHandle);
 
-    GLint compiled;
-    glGetShaderiv(m_shaderHandle, GL_COMPILE_STATUS, &compiled);
-    if (!compiled)
+    if (!TKRHI::GetShaderCompileStatus(m_shaderHandle))
     {
-      GLint infoLen = 0;
-      glGetShaderiv(m_shaderHandle, GL_INFO_LOG_LENGTH, &infoLen);
+      int infoLen = TKRHI::GetShaderInfoLogLength(m_shaderHandle);
       if (infoLen > 1)
       {
         char* log = new char[infoLen];
-        glGetShaderInfoLog(m_shaderHandle, infoLen, nullptr, log);
+        TKRHI::GetShaderInfoLog(m_shaderHandle, infoLen, log);
 
         TK_ERR(log);
         SafeDelArray(log);
       }
 
-      glDeleteShader(m_shaderHandle);
+      TKRHI::DeleteShader(m_shaderHandle);
       return 0;
     }
 

@@ -32,6 +32,99 @@ namespace ToolKit
       glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
     }
 
+    uint RHIOpenGL::CreateShader(uint type) { return glCreateShader(type); }
+
+    void RHIOpenGL::DeleteShader(uint shaderHandle) { glDeleteShader(shaderHandle); }
+
+    void RHIOpenGL::ShaderSource(uint shaderHandle, const char* source)
+    {
+      glShaderSource(shaderHandle, 1, &source, nullptr);
+    }
+
+    void RHIOpenGL::CompileShader(uint shaderHandle) { glCompileShader(shaderHandle); }
+
+    bool RHIOpenGL::GetShaderCompileStatus(uint shaderHandle)
+    {
+      GLint compiled = 0;
+      glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &compiled);
+      return compiled != 0;
+    }
+
+    int RHIOpenGL::GetShaderInfoLogLength(uint shaderHandle)
+    {
+      GLint length = 0;
+      glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &length);
+      return length;
+    }
+
+    void RHIOpenGL::GetShaderInfoLog(uint shaderHandle, int bufSize, char* infoLog)
+    {
+      glGetShaderInfoLog(shaderHandle, bufSize, nullptr, infoLog);
+    }
+
+    // Program
+
+    uint RHIOpenGL::CreateProgram() { return glCreateProgram(); }
+
+    void RHIOpenGL::DeleteProgram(uint programHandle) { glDeleteProgram(programHandle); }
+
+    void RHIOpenGL::AttachShader(uint programHandle, uint shaderHandle)
+    {
+      glAttachShader(programHandle, shaderHandle);
+    }
+
+    void RHIOpenGL::LinkProgram(uint programHandle) { glLinkProgram(programHandle); }
+
+    bool RHIOpenGL::GetProgramLinkStatus(uint programHandle)
+    {
+      GLint linked = 0;
+      glGetProgramiv(programHandle, GL_LINK_STATUS, &linked);
+      return linked != 0;
+    }
+
+    int RHIOpenGL::GetProgramInfoLogLength(uint programHandle)
+    {
+      GLint length = 0;
+      glGetProgramiv(programHandle, GL_INFO_LOG_LENGTH, &length);
+      return length;
+    }
+
+    void RHIOpenGL::GetProgramInfoLog(uint programHandle, int bufSize, char* infoLog)
+    {
+      glGetProgramInfoLog(programHandle, bufSize, nullptr, infoLog);
+    }
+
+    void RHIOpenGL::UseProgram(uint programHandle) { glUseProgram(programHandle); }
+
+    uint RHIOpenGL::GetCurrentProgram()
+    {
+      GLint current = 0;
+      glGetIntegerv(GL_CURRENT_PROGRAM, &current);
+      return (uint) current;
+    }
+
+    int RHIOpenGL::GetUniformLocation(uint programHandle, const char* name)
+    {
+      return glGetUniformLocation(programHandle, name);
+    }
+
+    void RHIOpenGL::Uniform1i(int location, int value) { glUniform1i(location, value); }
+
+    uint RHIOpenGL::GetUniformBlockIndex(uint programHandle, const char* name)
+    {
+      return glGetUniformBlockIndex(programHandle, name);
+    }
+
+    void RHIOpenGL::UniformBlockBinding(uint programHandle, uint blockIndex, uint bindingPoint)
+    {
+      glUniformBlockBinding(programHandle, blockIndex, bindingPoint);
+    }
+
+    void RHIOpenGL::BindUniformBufferBase(uint bindingPoint, uint bufferId)
+    {
+      glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, bufferId);
+    }
+
     static RHIOpenGL s_glBackend;
 
     void RegisterOpenGLBackend(void* glGetProcAddress)
