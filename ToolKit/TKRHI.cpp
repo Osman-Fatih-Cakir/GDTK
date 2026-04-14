@@ -12,7 +12,7 @@ namespace ToolKit
 
   namespace TKRHI
   {
-    RHIFunctions g_rhi {};
+    RHIBackend* g_rhi = nullptr;
   }
 
 } // namespace ToolKit

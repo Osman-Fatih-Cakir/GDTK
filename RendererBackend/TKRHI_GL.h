@@ -7,11 +7,25 @@
 
 #pragma once
 
+#include "TKRHI.h"
+
 namespace ToolKit
 {
   namespace TKRHI
   {
-    /** Populates TKRHI::g_rhi with OpenGL implementations. Must be called after GL context creation. */
+
+    class RHIOpenGL : public RHIBackend
+    {
+     public:
+      void GenBuffer(uint* bufferId) override;
+      void DeleteBuffers(int count, const uint* bufferIds) override;
+      void BindUniformBuffer(uint bufferId) override;
+      void BufferDataUniform(uint64 size, const void* data) override;
+      void BufferSubDataUniform(uint64 offset, uint64 size, const void* data) override;
+    };
+
+    /** Populates TKRHI::g_rhi with OpenGL backend. Must be called after GL context creation. */
     void RegisterOpenGLBackend(void* glGetProcAddress);
-  }
+
+  } // namespace TKRHI
 } // namespace ToolKit

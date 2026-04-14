@@ -15,53 +15,38 @@ namespace ToolKit
   namespace TKRHI
   {
 
-    // Buffer
-    //////////////////////////////////////////
-
-    /** Creates a GPU buffer and returns its handle. */
-    using FnGenBuffer = void (*)(uint* bufferId);
-
-    /** Deletes GPU buffers. */
-    using FnDeleteBuffers = void (*)(int count, const uint* bufferIds);
-
-    /** Binds a buffer to the uniform buffer target. */
-    using FnBindUniformBuffer = void (*)(uint bufferId);
-
-    /** Allocates storage for the currently bound uniform buffer. */
-    using FnBufferDataUniform = void (*)(uint64 size, const void* data);
-
-    /** Updates a sub-region of the currently bound uniform buffer. */
-    using FnBufferSubDataUniform = void (*)(uint64 offset, uint64 size, const void* data);
-
-    // Function pointer table.
-    //////////////////////////////////////////
-
-    struct RHIFunctions
+    class TK_API RHIBackend
     {
-      FnGenBuffer GenBuffer                     = nullptr;
-      FnDeleteBuffers DeleteBuffers             = nullptr;
-      FnBindUniformBuffer BindUniformBuffer     = nullptr;
-      FnBufferDataUniform BufferDataUniform     = nullptr;
-      FnBufferSubDataUniform BufferSubDataUniform = nullptr;
+     public:
+      virtual ~RHIBackend() = default;
+
+      // Buffer
+      //////////////////////////////////////////
+
+      virtual void GenBuffer(uint* bufferId)                                        = 0;
+      virtual void DeleteBuffers(int count, const uint* bufferIds)                  = 0;
+      virtual void BindUniformBuffer(uint bufferId)                                 = 0;
+      virtual void BufferDataUniform(uint64 size, const void* data)                 = 0;
+      virtual void BufferSubDataUniform(uint64 offset, uint64 size, const void* data) = 0;
     };
 
-    /** Global RHI function table, populated by the active backend module. */
-    TK_API extern RHIFunctions g_rhi;
+    /** Global RHI backend instance, set by the active backend module. */
+    TK_API extern RHIBackend* g_rhi;
 
     // Convenience inline wrappers.
     //////////////////////////////////////////
 
-    inline void GenBuffer(uint* bufferId) { g_rhi.GenBuffer(bufferId); }
+    inline void GenBuffer(uint* bufferId) { g_rhi->GenBuffer(bufferId); }
 
-    inline void DeleteBuffers(int count, const uint* bufferIds) { g_rhi.DeleteBuffers(count, bufferIds); }
+    inline void DeleteBuffers(int count, const uint* bufferIds) { g_rhi->DeleteBuffers(count, bufferIds); }
 
-    inline void BindUniformBuffer(uint bufferId) { g_rhi.BindUniformBuffer(bufferId); }
+    inline void BindUniformBuffer(uint bufferId) { g_rhi->BindUniformBuffer(bufferId); }
 
-    inline void BufferDataUniform(uint64 size, const void* data) { g_rhi.BufferDataUniform(size, data); }
+    inline void BufferDataUniform(uint64 size, const void* data) { g_rhi->BufferDataUniform(size, data); }
 
     inline void BufferSubDataUniform(uint64 offset, uint64 size, const void* data)
     {
-      g_rhi.BufferSubDataUniform(offset, size, data);
+      g_rhi->BufferSubDataUniform(offset, size, data);
     }
 
   } // namespace TKRHI
