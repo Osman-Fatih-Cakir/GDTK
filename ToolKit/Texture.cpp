@@ -14,11 +14,11 @@
 #include "Image.h"
 #include "Logger.h"
 #include "Material.h"
-#include "RHI.h"
+#include "RHIConstants.h"
 #include "RenderSystem.h"
 #include "Shader.h"
 #include "Stats.h"
-#include "TKOpenGL.h"
+#include "TKRHI.h"
 #include "ToolKit.h"
 
 #include "DebugNew.h"
@@ -118,54 +118,51 @@ namespace ToolKit
     }
 
     assert(m_textureId == 0 && "Texture already initialized.");
-    glGenTextures(1, &m_textureId);
-    RHI::SetTexture((GLenum) m_settings.Target, m_textureId);
+    TKRHI::CreateTextures(1, &m_textureId);
+    TKRHI::SetTextureBinding((uint) m_settings.Target, m_textureId);
 
     uint64 pixelCount = (uint64) m_width * (uint64) m_height;
     if (m_settings.Type != GraphicTypes::TypeFloat)
     {
-      glTexImage2D(GL_TEXTURE_2D,
-                   0,
-                   (GLint) m_settings.InternalFormat,
-                   m_width,
-                   m_height,
-                   0,
-                   (GLenum) m_settings.Format,
-                   (GLenum) m_settings.Type,
-                   m_image);
+      TKRHI::SetTextureData2D((uint) GraphicTypes::Target2D,
+                              0,
+                              (int) m_settings.InternalFormat,
+                              m_width,
+                              m_height,
+                              (uint) m_settings.Format,
+                              (uint) m_settings.Type,
+                              m_image);
     }
     else
     {
-      glTexImage2D(GL_TEXTURE_2D,
-                   0,
-                   (GLint) m_settings.InternalFormat,
-                   m_width,
-                   m_height,
-                   0,
-                   (GLenum) m_settings.Format,
-                   (GLenum) m_settings.Type,
-                   m_imagef);
+      TKRHI::SetTextureData2D((uint) GraphicTypes::Target2D,
+                              0,
+                              (int) m_settings.InternalFormat,
+                              m_width,
+                              m_height,
+                              (uint) m_settings.Format,
+                              (uint) m_settings.Type,
+                              m_imagef);
     }
 
     ApplyTextureSettings(m_settings);
     Stats::AddVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat));
 
-    if (TK_GL_EXT_texture_filter_anisotropic == 1)
+    if (TKRHI::IsAnisotropicFilteringSupported())
     {
-      float maxAniso = 1.0f;
-      glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+      float maxAniso = TKRHI::GetMaxAnisotropyLevel();
 
       EngineSettings& settings = GetEngineSettings();
       int anisoVal             = settings.m_graphics->GetAnisotropicTextureFilteringVal().GetValue<int>();
       float aniso              = glm::max(1.0f, float(anisoVal));
       aniso                    = glm::min(maxAniso, aniso);
 
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+      TKRHI::SetTextureParamFloat((uint) GraphicTypes::Target2D, (uint) TKRHI::TextureParam::MaxAnisotropyExt, aniso);
     }
 
     if (m_settings.GenerateMipMap)
     {
-      glGenerateMipmap(GL_TEXTURE_2D);
+      TKRHI::GenerateTextureMipmaps((uint) GraphicTypes::Target2D);
     }
 
     if (flushClientSideArray)
@@ -189,25 +186,25 @@ namespace ToolKit
       if (m_settings.msaaCount > MsaaSampleCount::x0)
       {
         // There is no msaa render texture, so delete the renderbuffer.
-        glDeleteRenderbuffers(1, &m_textureId);
+        TKRHI::DestroyRenderbuffer(m_textureId);
         Stats::RemoveVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat) *
                                       (int) m_settings.msaaCount);
       }
       else
       {
-        RHI::DeleteTexture(m_textureId);
+        TKRHI::DestroyTexture(m_textureId);
         Stats::RemoveVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat));
       }
     }
     else if (m_settings.Target == GraphicTypes::Target2DArray)
     {
       assert(m_settings.Layers > 0 && "Layer count must be greater than 0");
-      RHI::DeleteTexture(m_textureId);
+      TKRHI::DestroyTexture(m_textureId);
       Stats::RemoveVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat) * m_settings.Layers);
     }
     else if (m_settings.Target == GraphicTypes::TargetCubeMap)
     {
-      RHI::DeleteTexture(m_textureId);
+      TKRHI::DestroyTexture(m_textureId);
       Stats::RemoveVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat) * 6);
     }
     else
@@ -233,8 +230,8 @@ namespace ToolKit
 
   void Texture::GenerateMipMaps()
   {
-    RHI::SetTexture((GLenum) m_settings.Target, m_textureId);
-    glGenerateMipmap((GLenum) m_settings.Target);
+    TKRHI::SetTextureBinding((uint) m_settings.Target, m_textureId);
+    TKRHI::GenerateTextureMipmaps((uint) m_settings.Target);
   }
 
   bool Texture::IsMultiSampled() { return m_settings.msaaCount > MsaaSampleCount::x0; }
@@ -255,14 +252,14 @@ namespace ToolKit
 
   void Texture::ApplyTextureSettings(const TextureSettings& settings)
   {
-    glTexParameteri((GLenum) settings.Target, GL_TEXTURE_MIN_FILTER, (GLint) settings.MinFilter);
-    glTexParameteri((GLenum) settings.Target, GL_TEXTURE_MAG_FILTER, (GLint) settings.MagFilter);
-    glTexParameteri((GLenum) settings.Target, GL_TEXTURE_WRAP_S, (GLint) settings.WarpS);
-    glTexParameteri((GLenum) settings.Target, GL_TEXTURE_WRAP_T, (GLint) settings.WarpT);
+    TKRHI::SetTextureParamInt((uint) settings.Target, (uint) TKRHI::TextureParam::MinFilter, (int) settings.MinFilter);
+    TKRHI::SetTextureParamInt((uint) settings.Target, (uint) TKRHI::TextureParam::MagFilter, (int) settings.MagFilter);
+    TKRHI::SetTextureParamInt((uint) settings.Target, (uint) TKRHI::TextureParam::WrapS, (int) settings.WarpS);
+    TKRHI::SetTextureParamInt((uint) settings.Target, (uint) TKRHI::TextureParam::WrapT, (int) settings.WarpT);
 
     if (settings.Target == GraphicTypes::TargetCubeMap)
     {
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, (GLint) settings.WarpR);
+      TKRHI::SetTextureParamInt((uint) GraphicTypes::TargetCubeMap, (uint) TKRHI::TextureParam::WrapR, (int) settings.WarpR);
     }
   }
 
@@ -294,7 +291,7 @@ namespace ToolKit
     int internalFormatSize = m_stencil ? 4 : 3;
 
     int sizeMultiplier     = 1;
-    if (m_settings.msaaCount > MsaaSampleCount::x0 && glRenderbufferStorageMultisampleEXT != nullptr)
+    if (m_settings.msaaCount > MsaaSampleCount::x0 && TKRHI::IsMSAARenderbufferSupported())
     {
       sizeMultiplier = (int) m_settings.msaaCount;
     }
@@ -320,25 +317,24 @@ namespace ToolKit
       m_settings.msaaCount = MsaaSampleCount::x0;
     }
 
-    glGenRenderbuffers(1, &m_textureId);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_textureId);
+    TKRHI::CreateRenderbuffers(1, &m_textureId);
+    TKRHI::SetRenderbufferBinding(m_textureId);
 
     Stats::SetGpuResourceLabel(m_label, GpuResourceType::RenderBuffer, m_textureId);
 
     int sizeMultiplier = 1;
     if (m_settings.msaaCount > MsaaSampleCount::x0)
     {
-      glRenderbufferStorageMultisample(GL_RENDERBUFFER,
-                                       (int) m_settings.msaaCount,
-                                       (GLenum) GetDepthFormat(),
-                                       m_width,
-                                       m_height);
+      TKRHI::AllocateRenderbufferStorageMSAA((int) m_settings.msaaCount,
+                                             (uint) GetDepthFormat(),
+                                             m_width,
+                                             m_height);
 
       sizeMultiplier = (int) m_settings.msaaCount;
     }
     else
     {
-      glRenderbufferStorage(GL_RENDERBUFFER, (GLenum) GetDepthFormat(), m_width, m_height);
+      TKRHI::AllocateRenderbufferStorage((uint) GetDepthFormat(), m_width, m_height);
     }
 
     Stats::AddVRAMUsageInBytes((uint64) (m_width * m_height) * GetFormatSize());
@@ -351,7 +347,7 @@ namespace ToolKit
       return;
     }
 
-    glDeleteRenderbuffers(1, &m_textureId);
+    TKRHI::DestroyRenderbuffer(m_textureId);
     Stats::RemoveVRAMUsageInBytes((uint64) (m_width * m_height) * GetFormatSize());
 
     m_textureId = 0;
@@ -379,18 +375,17 @@ namespace ToolKit
     }
 
     assert(m_textureId == 0 && "Texture already initialized.");
-    glGenTextures(1, &m_textureId);
-    RHI::SetTexture((GLenum) m_settings.Target, m_textureId);
+    TKRHI::CreateTextures(1, &m_textureId);
+    TKRHI::SetTextureBinding((uint) m_settings.Target, m_textureId);
 
-    glTexImage2D((GLenum) m_settings.Target,
-                 0,
-                 (GLint) m_settings.InternalFormat,
-                 m_width,
-                 m_height,
-                 0,
-                 (GLenum) m_settings.Format,
-                 (GLenum) m_settings.Type,
-                 data);
+    TKRHI::SetTextureData2D((uint) m_settings.Target,
+                            0,
+                            (int) m_settings.InternalFormat,
+                            m_width,
+                            m_height,
+                            (uint) m_settings.Format,
+                            (uint) m_settings.Type,
+                            data);
 
     ApplyTextureSettings(m_settings);
 
@@ -406,17 +401,17 @@ namespace ToolKit
       return;
     }
 
-    RHI::SetTexture((GLenum) m_settings.Target, m_textureId);
+    TKRHI::SetTextureBinding((uint) m_settings.Target, m_textureId);
 
-    glTexSubImage2D((GLenum) m_settings.Target,
-                    0,
-                    0,
-                    0,
-                    m_width,
-                    m_height,
-                    (GLenum) m_settings.Format,
-                    (GLenum) m_settings.Type,
-                    data);
+    TKRHI::UpdateTextureData2D((uint) m_settings.Target,
+                               0,
+                               0,
+                               0,
+                               m_width,
+                               m_height,
+                               (uint) m_settings.Format,
+                               (uint) m_settings.Type,
+                               data);
 
     Stats::AddVRAMUsageInBytes(size);
   }
@@ -428,7 +423,7 @@ namespace ToolKit
       return;
     }
 
-    RHI::DeleteTexture(m_textureId);
+    TKRHI::DestroyTexture(m_textureId);
     Stats::RemoveVRAMUsageInBytes((uint64) (m_width * m_height) * BytesOfFormat(m_settings.InternalFormat));
 
     m_textureId = 0;
@@ -549,26 +544,26 @@ namespace ToolKit
     m_settings.Target         = GraphicTypes::TargetCubeMap;
 
     assert(m_textureId == 0 && "Texture already initialized.");
-    glGenTextures(1, &m_textureId);
-    RHI::SetTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
-
-    uint sides[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                     GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-                     GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-                     GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                     GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-                     GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
+    TKRHI::CreateTextures(1, &m_textureId);
+    TKRHI::SetTextureBinding((uint) GraphicTypes::TargetCubeMap, m_textureId);
 
     for (int i = 0; i < 6; i++)
     {
-      glTexImage2D(sides[i], 0, GL_RGBA, m_width, m_width, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_images[i]);
+      TKRHI::SetCubeTextureFaceData(i,
+                                    0,
+                                    (int) GraphicTypes::FormatRGBA,
+                                    m_width,
+                                    m_width,
+                                    (uint) GraphicTypes::FormatRGBA,
+                                    (uint) GraphicTypes::TypeUnsignedByte,
+                                    m_images[i]);
     }
 
     uint64 pixelCount = (uint64) m_width * (uint64) m_height;
     Stats::AddVRAMUsageInBytes(pixelCount * 4 * 6); // Component count * times face count.
 
     ApplyTextureSettings(m_settings);
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    TKRHI::GenerateTextureMipmaps((uint) GraphicTypes::TargetCubeMap);
 
     if (flushClientSideArray)
     {
@@ -595,6 +590,8 @@ namespace ToolKit
 
   void CubeMap::AllocateMipMapStorage()
   {
+    TKRHI::SetTextureBinding((uint) GraphicTypes::TargetCubeMap, m_textureId);
+
     const int numMipLevels = CalculateMipmapLevels();
 
     // Pre-allocate storage for all mip levels
@@ -609,16 +606,14 @@ namespace ToolKit
 
       for (int face = 0; face < 6; face++)
       {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-                     mip,
-                     (GLint) m_settings.InternalFormat,
-                     mipWidth,
-                     mipHeight,
-                     0,
-                     (GLenum) m_settings.Format,
-                     (GLenum) m_settings.Type,
-                     nullptr // No data yet, just allocating
-        );
+        TKRHI::SetCubeTextureFaceData(face,
+                                      mip,
+                                      (int) m_settings.InternalFormat,
+                                      mipWidth,
+                                      mipHeight,
+                                      (uint) m_settings.Format,
+                                      (uint) m_settings.Type,
+                                      nullptr);
       }
     }
   }
@@ -813,8 +808,10 @@ namespace ToolKit
     m_specularEnvMap->GenerateMipMaps();
 
     // Clamp max mip level to the last baked level.
-    RHI::SetTexture(GL_TEXTURE_CUBE_MAP, m_specularEnvMap->m_textureId);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, RHIConstants::SpecularIBLLods - 1);
+    TKRHI::SetTextureBinding((uint) GraphicTypes::TargetCubeMap, m_specularEnvMap->m_textureId);
+    TKRHI::SetTextureParamInt((uint) GraphicTypes::TargetCubeMap,
+                              (uint) TKRHI::TextureParam::MaxLevel,
+                              (int) RHIConstants::SpecularIBLLods - 1);
 
     for (int i = 1; i < RHIConstants::SpecularIBLLods; i++)
     {
@@ -948,13 +945,13 @@ namespace ToolKit
 
     if (m_settings.msaaCount > MsaaSampleCount::x0)
     {
-      glGenRenderbuffers(1, &m_textureId);
-      glBindRenderbuffer(GL_RENDERBUFFER, m_textureId);
+      TKRHI::CreateRenderbuffers(1, &m_textureId);
+      TKRHI::SetRenderbufferBinding(m_textureId);
     }
     else
     {
-      glGenTextures(1, &m_textureId);
-      RHI::SetTexture((GLenum) m_settings.Target, m_textureId);
+      TKRHI::CreateTextures(1, &m_textureId);
+      TKRHI::SetTextureBinding((uint) m_settings.Target, m_textureId);
     }
 
     Stats::SetGpuResourceLabel(m_label, GpuResourceType::Texture, m_textureId);
@@ -966,11 +963,10 @@ namespace ToolKit
       {
         // Opengl 3.0 / es 3.0 does not support multisampled textures directly.
         // Render buffer is used.
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER,
-                                         (int) m_settings.msaaCount,
-                                         (GLenum) m_settings.InternalFormat,
-                                         m_width,
-                                         m_height);
+        TKRHI::AllocateRenderbufferStorageMSAA((int) m_settings.msaaCount,
+                                               (uint) m_settings.InternalFormat,
+                                               m_width,
+                                               m_height);
       }
       else
       {
@@ -980,15 +976,14 @@ namespace ToolKit
           initialData = m_image;
         }
 
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     (int) m_settings.InternalFormat,
-                     m_width,
-                     m_height,
-                     0,
-                     (int) m_settings.Format,
-                     (int) m_settings.Type,
-                     initialData);
+        TKRHI::SetTextureData2D((uint) GraphicTypes::Target2D,
+                                0,
+                                (int) m_settings.InternalFormat,
+                                m_width,
+                                m_height,
+                                (uint) m_settings.Format,
+                                (uint) m_settings.Type,
+                                initialData);
       }
 
       ApplyTextureSettings(m_settings);
@@ -998,15 +993,14 @@ namespace ToolKit
     {
       for (uint i = 0; i < 6; i++)
       {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                     0,
-                     (int) m_settings.InternalFormat,
-                     m_width,
-                     m_height,
-                     0,
-                     (int) m_settings.Format,
-                     (int) m_settings.Type,
-                     0);
+        TKRHI::SetCubeTextureFaceData((int) i,
+                                      0,
+                                      (int) m_settings.InternalFormat,
+                                      m_width,
+                                      m_height,
+                                      (uint) m_settings.Format,
+                                      (uint) m_settings.Type,
+                                      nullptr);
       }
 
       ApplyTextureSettings(m_settings);
@@ -1015,16 +1009,15 @@ namespace ToolKit
     else if (m_settings.Target == GraphicTypes::Target2DArray)
     {
       assert(m_settings.Layers > 0 && "Layer count must be at least 1");
-      glTexImage3D(GL_TEXTURE_2D_ARRAY,
-                   0,
-                   (int) m_settings.InternalFormat,
-                   m_width,
-                   m_height,
-                   m_settings.Layers,
-                   0,
-                   (int) m_settings.Format,
-                   (int) m_settings.Type,
-                   nullptr);
+      TKRHI::SetTextureData3D((uint) GraphicTypes::Target2DArray,
+                              0,
+                              (int) m_settings.InternalFormat,
+                              m_width,
+                              m_height,
+                              m_settings.Layers,
+                              (uint) m_settings.Format,
+                              (uint) m_settings.Type,
+                              nullptr);
 
       ApplyTextureSettings(m_settings);
       Stats::AddVRAMUsageInBytes(pixelCount * BytesOfFormat(m_settings.InternalFormat) * m_settings.Layers);

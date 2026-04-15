@@ -7,44 +7,13 @@
 
 #pragma once
 
+#include "RHIConstants.h"
 #include "Stats.h"
 #include "TKOpenGL.h"
 #include "Types.h"
 
 namespace ToolKit
 {
-
-  struct RHIConstants
-  {
-    static constexpr ubyte TextureSlotCount              = 32;
-    static constexpr ubyte MaxLightsPerObject            = 128;
-    static constexpr uint ShadowAtlasSlot                = 8;
-    static constexpr uint SpecularIBLLods                = 7;
-    static constexpr uint BrdfLutTextureSize             = 512;
-    static constexpr float ShadowBiasMultiplier          = 0.01f;
-
-    /** Update shadow.shader MAX_CASCADE_COUNT accordingly. */
-    static constexpr uint MaxCascadeCount                = 4;
-
-    /** Update drawDataInc.shader DIRECTIONAL_LIGHT_CACHE_ITEM_COUNT accordingly. */
-    static constexpr uint DirectionalLightCacheItemCount = 12;
-
-    /** Update drawDataInc.shader MAX_DIRECTIONAL_LIGHT_PER_OBJECT accordingly. */
-    static constexpr uint MaxDirectionalLightPerObject   = 8;
-
-    /** Update drawDataInc.shader POINT_LIGHT_CACHE_ITEM_COUNT accordingly. */
-    static constexpr uint PointLightCacheItemCount       = 32;
-
-    /** Update drawDataInc.shader MAX_POINT_LIGHT_PER_OBJECT accordingly. */
-    static constexpr uint MaxPointLightPerObject         = 24;
-
-    /** Update drawDataInc.shader SPOT_LIGHT_CACHE_ITEM_COUNT accordingly. */
-    static constexpr uint SpotLightCacheItemCount        = 32;
-
-    /** Update drawDataInc.shader MAX_SPOT_LIGHT_PER_OBJECT accordingly. */
-    static constexpr uint MaxSpotLightPerObject          = 24;
-  };
-
   class TK_API RHI
   {
     friend class Renderer;

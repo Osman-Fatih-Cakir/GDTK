@@ -48,6 +48,58 @@ namespace ToolKit
       uint GetUniformBlockIndex(uint programHandle, const char* name) override;
       void UniformBlockBinding(uint programHandle, uint blockIndex, uint bindingPoint) override;
       void BindUniformBufferBase(uint bindingPoint, uint bufferId) override;
+
+      // Texture
+      void CreateTextures(int count, uint* textureIds) override;
+      void DestroyTextures(int count, const uint* textureIds) override;
+      void SetTextureBinding(uint target, uint textureId, uint textureSlot = 0) override;
+      void SetTextureData2D(uint target,
+                            int level,
+                            int internalFormat,
+                            int width,
+                            int height,
+                            uint format,
+                            uint type,
+                            const void* data) override;
+      void SetCubeTextureFaceData(int faceIndex,
+                                  int level,
+                                  int internalFormat,
+                                  int width,
+                                  int height,
+                                  uint format,
+                                  uint type,
+                                  const void* data) override;
+      void UpdateTextureData2D(uint target,
+                               int level,
+                               int xoffset,
+                               int yoffset,
+                               int width,
+                               int height,
+                               uint format,
+                               uint type,
+                               const void* data) override;
+      void SetTextureData3D(uint target,
+                            int level,
+                            int internalFormat,
+                            int width,
+                            int height,
+                            int depth,
+                            uint format,
+                            uint type,
+                            const void* data) override;
+      void SetTextureParamInt(uint target, uint paramName, int value) override;
+      void SetTextureParamFloat(uint target, uint paramName, float value) override;
+      void GenerateTextureMipmaps(uint target) override;
+      bool IsAnisotropicFilteringSupported() override;
+      float GetMaxAnisotropyLevel() override;
+
+      // Renderbuffer
+      void CreateRenderbuffers(int count, uint* renderbufferIds) override;
+      void SetRenderbufferBinding(uint renderbufferId) override;
+      void DestroyRenderbuffers(int count, const uint* renderbufferIds) override;
+      void AllocateRenderbufferStorage(uint internalformat, int width, int height) override;
+      void AllocateRenderbufferStorageMSAA(int samples, uint internalformat, int width, int height) override;
+      bool IsMSAARenderbufferSupported() override;
     };
 
     /** Populates TKRHI::g_rhi with OpenGL backend. Must be called after GL context creation. */

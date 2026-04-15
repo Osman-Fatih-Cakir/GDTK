@@ -125,6 +125,174 @@ namespace ToolKit
       glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, bufferId);
     }
 
+    // Texture
+
+    void RHIOpenGL::CreateTextures(int count, uint* textureIds) { glGenTextures(count, textureIds); }
+
+    void RHIOpenGL::DestroyTextures(int count, const uint* textureIds) { glDeleteTextures(count, textureIds); }
+
+    void RHIOpenGL::SetTextureBinding(uint target, uint textureId, uint textureSlot)
+    {
+      glActiveTexture(GL_TEXTURE0 + textureSlot);
+      glBindTexture((GLenum) target, textureId);
+    }
+
+    void RHIOpenGL::SetTextureData2D(uint target,
+                                     int level,
+                                     int internalFormat,
+                                     int width,
+                                     int height,
+                                     uint format,
+                                     uint type,
+                                     const void* data)
+    {
+      glTexImage2D((GLenum) target,
+                   level,
+                   (GLint) internalFormat,
+                   width,
+                   height,
+                   0,
+                   (GLenum) format,
+                   (GLenum) type,
+                   data);
+    }
+
+    void RHIOpenGL::SetCubeTextureFaceData(int faceIndex,
+                                           int level,
+                                           int internalFormat,
+                                           int width,
+                                           int height,
+                                           uint format,
+                                           uint type,
+                                           const void* data)
+    {
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+                   level,
+                   (GLint) internalFormat,
+                   width,
+                   height,
+                   0,
+                   (GLenum) format,
+                   (GLenum) type,
+                   data);
+    }
+
+    void RHIOpenGL::UpdateTextureData2D(uint target,
+                                        int level,
+                                        int xoffset,
+                                        int yoffset,
+                                        int width,
+                                        int height,
+                                        uint format,
+                                        uint type,
+                                        const void* data)
+    {
+      glTexSubImage2D((GLenum) target,
+                      level,
+                      xoffset,
+                      yoffset,
+                      width,
+                      height,
+                      (GLenum) format,
+                      (GLenum) type,
+                      data);
+    }
+
+    void RHIOpenGL::SetTextureData3D(uint target,
+                                     int level,
+                                     int internalFormat,
+                                     int width,
+                                     int height,
+                                     int depth,
+                                     uint format,
+                                     uint type,
+                                     const void* data)
+    {
+      glTexImage3D((GLenum) target,
+                   level,
+                   (GLint) internalFormat,
+                   width,
+                   height,
+                   depth,
+                   0,
+                   (GLenum) format,
+                   (GLenum) type,
+                   data);
+    }
+
+    void RHIOpenGL::SetTextureParamInt(uint target, uint paramName, int value)
+    {
+      glTexParameteri((GLenum) target, (GLenum) paramName, (GLint) value);
+    }
+
+    void RHIOpenGL::SetTextureParamFloat(uint target, uint paramName, float value)
+    {
+      glTexParameterf((GLenum) target, (GLenum) paramName, value);
+    }
+
+    void RHIOpenGL::GenerateTextureMipmaps(uint target) { glGenerateMipmap((GLenum) target); }
+
+    bool RHIOpenGL::IsAnisotropicFilteringSupported()
+    {
+#ifdef GL_EXT_texture_filter_anisotropic
+      return GLAD_GL_EXT_texture_filter_anisotropic == 1;
+#else
+      return false;
+#endif
+    }
+
+    float RHIOpenGL::GetMaxAnisotropyLevel()
+    {
+      if (!IsAnisotropicFilteringSupported())
+      {
+        return 1.0f;
+      }
+
+      float maxAniso = 1.0f;
+#ifdef GL_EXT_texture_filter_anisotropic
+      glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+#endif
+      return maxAniso;
+    }
+
+    // Renderbuffer
+
+    void RHIOpenGL::CreateRenderbuffers(int count, uint* renderbufferIds)
+    {
+      glGenRenderbuffers(count, renderbufferIds);
+    }
+
+    void RHIOpenGL::SetRenderbufferBinding(uint renderbufferId)
+    {
+      glBindRenderbuffer(GL_RENDERBUFFER, renderbufferId);
+    }
+
+    void RHIOpenGL::DestroyRenderbuffers(int count, const uint* renderbufferIds)
+    {
+      glDeleteRenderbuffers(count, renderbufferIds);
+    }
+
+    void RHIOpenGL::AllocateRenderbufferStorage(uint internalformat, int width, int height)
+    {
+      glRenderbufferStorage(GL_RENDERBUFFER, (GLenum) internalformat, width, height);
+    }
+
+    void RHIOpenGL::AllocateRenderbufferStorageMSAA(int samples, uint internalformat, int width, int height)
+    {
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, (GLenum) internalformat, width, height);
+    }
+
+    bool RHIOpenGL::IsMSAARenderbufferSupported()
+    {
+#if defined(GLAD_GL_VERSION_3_0)
+      return GLAD_GL_VERSION_3_0 == 1;
+#elif defined(GLAD_GL_ES_VERSION_3_0)
+      return GLAD_GL_ES_VERSION_3_0 == 1;
+#else
+      return true;
+#endif
+    }
+
     static RHIOpenGL s_glBackend;
 
     void RegisterOpenGLBackend(void* glGetProcAddress)
