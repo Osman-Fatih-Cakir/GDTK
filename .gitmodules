@@ -21,3 +21,6 @@
 [submodule "Dependency/minizip-ng"]
 	path = Dependency/minizip-ng
 	url = https://github.com/Oyun-Teknolojileri/minizip-ng.git
+[submodule "Dependency/VulkanMemoryAllocator"]
+	path = Dependency/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
