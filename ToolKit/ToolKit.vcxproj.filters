@@ -238,6 +238,9 @@
     <ClCompile Include="ShadowAtlas.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Vulkan\VulkanBackend.cpp">
+      <Filter>Render\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -507,6 +510,9 @@
     <ClInclude Include="ShadowAtlas.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Vulkan\VulkanBackend.h">
+      <Filter>Render\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Entities">
@@ -535,6 +541,9 @@
     </Filter>
     <Filter Include="Render\Shaders">
       <UniqueIdentifier>{2252f47f-c3ed-4d44-8828-b7e639f283f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Vulkan">
+      <UniqueIdentifier>{61cff052-e953-4508-a34b-ca105359e4dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
