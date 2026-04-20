@@ -99,6 +99,8 @@
     <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Viewport.cpp" />
+    <ClCompile Include="Vulkan\TestRenderPass.cpp" />
+    <ClCompile Include="Vulkan\TestRenderPath.cpp" />
     <ClCompile Include="Vulkan\VulkanBackend.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +193,8 @@
     <ClInclude Include="UniformBuffer.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Viewport.h" />
+    <ClInclude Include="Vulkan\TestRenderPass.h" />
+    <ClInclude Include="Vulkan\TestRenderPath.h" />
     <ClInclude Include="Vulkan\VulkanBackend.h" />
   </ItemGroup>
   <ItemGroup>
