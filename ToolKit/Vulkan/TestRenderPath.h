@@ -24,11 +24,12 @@ namespace ToolKit
     void PostRender(Renderer* renderer) override;
 
    public:
-    FramebufferPtr m_framebuffer = nullptr;
-    Vec4 m_clearColor            = Vec4(0.4f, 0.2f, 0.6f, 1.0f);
+    FramebufferPtr m_framebuffer        = nullptr;
+    Vec4 m_clearColor                   = Vec4(0.4f, 0.2f, 0.6f, 1.0f);
 
    private:
-    TestRenderPassPtr m_testPass = nullptr;
+    TestRenderPassPtr m_testPass        = nullptr;
+    FramebufferPtr m_resolveFramebuffer = nullptr;
   };
 
 } // namespace ToolKit

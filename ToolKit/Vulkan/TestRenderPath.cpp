@@ -7,6 +7,9 @@
 
 #include "TestRenderPath.h"
 
+#include "Framebuffer.h"
+#include "Renderer.h"
+
 #include "DebugNew.h"
 
 namespace ToolKit
@@ -24,6 +27,21 @@ namespace ToolKit
     m_passArray.push_back(m_testPass);
 
     RenderPath::Render(renderer);
+
+    // Resolve MSAA if needed so the viewport can display the result.
+    if (m_framebuffer != nullptr && m_framebuffer->IsMultiSampled())
+    {
+      if (m_resolveFramebuffer == nullptr)
+      {
+        m_resolveFramebuffer = MakeNewPtr<Framebuffer>("TestResolve");
+      }
+
+      FramebufferSettings settings = m_framebuffer->GetSettings();
+      settings.msaaCount           = MsaaSampleCount::x0;
+      m_resolveFramebuffer->ReconstructIfNeeded(settings);
+      renderer->ResolveFramebuffer(m_framebuffer, m_resolveFramebuffer, {0});
+      renderer->EndPass();
+    }
 
     PostRender(renderer);
   }
